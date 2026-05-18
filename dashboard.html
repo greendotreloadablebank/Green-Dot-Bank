@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Green Dot • secure dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: #0b1a1e;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        /* main container */
+        .app {
+            width: 100%;
+            max-width: 1300px;
+            background: #0f2128;
+            border-radius: 42px;
+            box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+            backdrop-filter: blur(2px);
+            border: 1px solid #2d4b5a;
+        }
+
+        /* login screen */
+        #login-container {
+            background: #0b1c23;
+            padding: 32px 24px;
+            border-radius: 42px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header .logo {
+            color: #00d4aa;
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            text-shadow: 0 0 8px #00ffd0;
+        }
+
+        .login-header .logo span {
+            color: white;
+            font-weight: 300;
+        }
+
+        .login-box {
+            background: #132a33;
+            border-radius: 32px;
+            padding: 28px 22px;
+            border: 1px solid #2f5563;
+            box-shadow: 0 20px 30px -12px black;
+        }
+
+        .field {
+            margin-bottom: 24px;
+        }
+
+        .field label {
+            display: block;
+            color: #aaccdd;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            margin-bottom: 8px;
+        }
+
+        .field input {
+            width: 100%;
+            background: #1d3e4a;
+            border: 1px solid #397180;
+            border-radius: 40px;
+            padding: 18px 22px;
+            font-size: 1rem;
+            color: white;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .field input:focus {
+            border-color: #00d4aa;
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.2);
+        }
+
+        .password-hint {
+            color: #7fa9b7;
+            font-size: 0.8rem;
+            margin-top: 8px;
+            padding-left: 16px;
+        }
+
+        #login-error {
+            background: #5e2e38;
+            border-left: 6px solid #ff5a6e;
+            color: #ffbcc5;
+            padding: 14px 18px;
+            border-radius: 30px;
+            margin: 28px 0 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn {
+            background: #00d4aa;
+            border: none;
+            border-radius: 60px;
+            padding: 20px 32px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0b1a1e;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 8px 0 #008f74, 0 10px 20px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #008f74, 0 5px 12px black;
+        }
+
+        /* dashboard */
+        #dashboard {
+            padding: 18px 18px 10px 18px;
+            color: white;
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo-small {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00d4aa;
+            line-height: 1;
+        }
+
+        .live-clock {
+            background: #1a3a44;
+            padding: 12px 22px;
+            border-radius: 60px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            font-family: monospace;
+            letter-spacing: 4px;
+            color: #e0f2fe;
+            border: 1px solid #379aad;
+            box-shadow: inset 0 2px 5px #0a1a20;
+        }
+
+        .balance-panel {
+            background: linear-gradient(165deg, #0e2c33, #06212a);
+            border-radius: 38px;
+            padding: 24px 28px;
+            border: 1px solid #2a697b;
+            box-shadow: 0 20px 30px -10px black;
+            margin-bottom: 28px;
+        }
+
+        .balance-label {
+            color: #9bc8d9;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .balance-amount {
+            font-size: 4rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 0 15px #00ffee;
+            line-height: 1;
+            margin-bottom: 24px;
+            word-break: break-word;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: #1e4755;
+            border: 1px solid #3f8b9e;
+            border-radius: 60px;
+            padding: 16px 34px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: 0.1s ease;
+            box-shadow: 0 5px 0 #0a2d36;
+            flex: 1 1 auto;
+            text-align: center;
+        }
+
+        .action-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #0a2d36;
+        }
+
+        .info-message {
+            background: #173d48;
+            border-radius: 28px;
+            padding: 20px 26px;
+            margin: 20px 0 28px;
+            color: #c2e5f0;
+            font-size: 1.1rem;
+            border-left: 10px solid #00d4aa;
+            box-shadow: 0 4px 12px black;
+        }
+
+        /* card flip */
+        .card-section {
+            margin: 30px 0 20px;
+            perspective: 2000px;
+        }
+
+        .card-flip {
+            background: transparent;
+            width: 100%;
+            max-width: 420px;
+            height: 250px;
+            cursor: pointer;
+            margin: 0 auto;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+            border-radius: 24px;
+        }
+
+        .card-flip.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 26px;
+            padding: 24px;
+            background: radial-gradient(circle at 20% 30%, #1e5f72, #0b353f);
+            border: 2px solid #70d7e0;
+            box-shadow: 0 20px 30px -5px #00000080, inset 0 0 30px #00968830;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: left;
+        }
+
+        .card-back {
+            background: radial-gradient(circle at 80% 10%, #2f697b, #0c3843);
+            transform: rotateY(180deg);
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .card-chip {
+            width: 50px;
+            height: 38px;
+            background: linear-gradient(135deg, #bbaa77, #d4c193);
+            border-radius: 8px;
+        }
+
+        .card-logo {
+            align-self: flex-end;
+            font-size: 2rem;
+            font-weight: 800;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .card-number {
+            font-size: 1.6rem;
+            letter-spacing: 4px;
+            font-weight: 500;
+            color: white;
+            text-shadow: 0 0 6px cyan;
+        }
+
+        .card-holder {
+            font-size: 1.2rem;
+            color: #dfeef5;
+            text-transform: uppercase;
+        }
+
+        .card-back-row {
+            display: flex;
+            justify-content: space-between;
+            background: #1d4753;
+            padding: 12px;
+            border-radius: 14px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .hint-doubleclick {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #98c7d8;
+            margin-top: 8px;
+        }
+
+        /* order steps */
+        .process-panel {
+            background: #112f39;
+            border-radius: 32px;
+            padding: 26px;
+            margin: 30px 0;
+            border: 1px solid #3b7e8f;
+        }
+
+        .process-panel h3 {
+            color: #a4ecf0;
+            font-size: 1.8rem;
+            margin-bottom: 26px;
+            font-weight: 600;
+        }
+
+        .step-list {
+            list-style: none;
+        }
+
+        .step-list li {
+            background: #1d4a58;
+            margin: 16px 0;
+            padding: 20px 22px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.1rem;
+            border-left: 6px solid #00d4aa;
+            box-shadow: 0 8px 0 #0a2e38;
+        }
+
+        .btc-address {
+            background: #09222b;
+            padding: 20px;
+            border-radius: 40px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            word-break: break-all;
+            color: #ffd966;
+            border: 1px dashed #ffb347;
+            margin: 15px 0;
+        }
+
+        .mail-link {
+            color: #00d4aa;
+            font-weight: 600;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* bottom navigation */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            background: #0b262f;
+            padding: 12px 16px;
+            border-radius: 80px;
+            margin: 24px 0 14px;
+            border: 1px solid #2e6d7a;
+        }
+
+        .nav-item {
+            color: #aad2df;
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding: 12px 22px;
+            border-radius: 50px;
+            transition: 0.1s;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            background: #00d4aa;
+            color: #0b1a1e;
+            box-shadow: 0 0 15px #00ffe0;
+        }
+
+        /* footer contact */
+        .contact-bar {
+            background: #0c2f39;
+            border-radius: 50px;
+            padding: 18px 22px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+            color: #b7dbe8;
+            margin-top: 15px;
+            border: 1px solid #3f8598;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 6px 14px;
+            border-radius: 40px;
+            background: #1d4f5c;
+            transition: 0.1s;
+        }
+
+        .contact-item:hover {
+            background: #2b6c7e;
+        }
+
+        .about-trigger {
+            cursor: pointer;
+            font-weight: 600;
+            color: #d0f0fa;
+        }
+
+        /* history / btc pages */
+        .page {
+            background: #0f2832;
+            border-radius: 36px;
+            padding: 28px;
+            margin: 20px 0;
+            border: 2px solid #328296;
+        }
+
+        .back-link {
+            color: #00d4aa;
+            font-size: 1.2rem;
+            margin-bottom: 28px;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .receipt-row {
+            background: #19434f;
+            padding: 26px;
+            border-radius: 28px;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #ffea9f;
+        }
+
+        .pending-card-status {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 40px 0;
+        }
+
+        .status-icon {
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .grey-badge {
+            background: #3f6d79;
+            width: 60px;
+            height: 60px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        /* responsive */
+        @media (max-width: 600px) {
+            .balance-amount { font-size: 3rem; }
+            .action-btn { font-size: 1.1rem; padding: 14px 20px; }
+            .live-clock { font-size: 1.2rem; letter-spacing: 2px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app" id="app">
+
+    <!-- LOGIN VIEW -->
+    <div id="login-container">
+        <div class="login-header">
+            <div class="logo">green<span>dot</span></div>
+            <div style="color:#8bb8c9; margin-top: 8px;">bank · secure access</div>
+        </div>
+        <div class="login-box">
+            <div class="field">
+                <label>Name</label>
+                <input type="text" id="login-name" placeholder="Your full name" value="Charles Watts">
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" id="login-email" placeholder="you@example.com" value="c.watts@example.com">
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="••••" value="">
+                <div class="password-hint">Use password: 1221</div>
+            </div>
+
+            <div id="login-error" class="hidden">
+                <span style="font-size:1.8rem;">⛔</span> The password you entered is invalid.
+            </div>
+
+            <button class="btn" id="login-btn">Access Account</button>
+            <div style="text-align:center; color:#4b7e8c; margin-top: 24px;">Secure • Green Dot Bank</div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD (hidden initially) -->
+    <div id="dashboard" class="hidden">
+        <div class="dash-header">
+            <div class="logo-small">green<span style="color:white;">dot</span></div>
+            <div class="live-clock" id="liveClock">00:00:00</div>
+        </div>
+
+        <!-- main dashboard content (home) -->
+        <div id="home-view">
+            <div class="balance-panel">
+                <div class="balance-label">Available Balance</div>
+                <div class="balance-amount">$212,000.00</div>
+                <div class="action-row">
+                    <div class="action-btn" id="transferBtn">Transfer</div>
+                    <div class="action-btn" id="depositBtn">Deposit</div>
+                </div>
+                <div id="actionMessage" class="info-message hidden"></div>
+            </div>
+
+            <!-- unlimited card with flip -->
+            <div class="card-section">
+                <div class="card-flip" id="cardFlip" ondblclick="flipCard()">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-chip"></div>
+                            <div class="card-logo">VISA</div>
+                            <div class="card-number">•••• •••• •••• 1758</div>
+                            <div class="card-holder" id="cardHolderName">CHARLES WATTS</div>
+                            <div style="color:#b4dfec;">12/26</div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-back-row"><span>CVV</span><span>535</span></div>
+                            <div class="card-back-row"><span>Card number</span><span>4188 9600 0367 1758</span></div>
+                            <div class="card-back-row"><span>Exp</span><span>12/26</span></div>
+                            <div style="color:#ccf; font-size:0.9rem;">UNLIMITED DEBIT</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hint-doubleclick">⏎ double‑click card to flip → back side</div>
+            </div>
+
+            <!-- Process of how to order your unlimited green dot card (replaces old text) -->
+            <div class="process-panel">
+                <h3>📦 Process Of how To Order Your Unlimited Green Dot Card</h3>
+                <ul class="step-list">
+                    <li>1. We reviewed your address already. To continue with your order and confirmation, follow step 2 below.</li>
+                    <li>2. Download any Crypto wallet app: <span style="color:#00ffc3;">Crypto.com, Coinbase, Trust Wallet, MetaMask</span></li>
+                    <li>3. Put at least <strong>$200</strong> in crypto, then send to our BTC wallet:<br>
+                        <div class="btc-address" id="btcAddressShow">bc1qgl5t8gwhfqvrwt9hd9ajf7vd6d9qkhz5za475a</div>
+                    </li>
+                    <li>4. Once payment completed ☑️, mail receipt to <span class="mail-link" id="mailReceiptLink">green-dot@greenmail.net</span><br>
+                    (click to open your mail app)</li>
+                </ul>
+                <div style="text-align:center; margin-top:20px;">
+                    <span class="action-btn" id="btcWalletPageBtn" style="background:#005f73;">🔷 BTC wallet</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- secondary pages: history, btc detail (hidden by default) -->
+        <div id="history-view" class="page hidden">
+            <div class="back-link" id="backFromHistory">← back to dashboard</div>
+            <h2 style="color:#c7f0ff;">📄 Transaction History</h2>
+            <div class="receipt-row">Direct Deposit · Green Dot Visa · +$212,000.00</div>
+            <div style="margin-top:30px; color:#bbddee;">Completed · Dec 12, 2025</div>
+        </div>
+
+        <div id="btc-view" class="page hidden">
+            <div class="back-link" id="backFromBtc">← back to dashboard</div>
+            <h2 style="color:#ffd966;">₿ Bitcoin wallet</h2>
+            <div class="btc-address" style="font-size:1.1rem;">bc1qgl5t8gwhfqvrwt9hd9ajf7vd6d9qkhz5za475a</div>
+            <p style="color:#b0e2f0;">Once payment is completed ☑️ drop the receipt on <span class="mail-link" id="btcMailLink">green-dot@greenmail.net</span></p>
+            <p>Your card is on pending waiting for your BTC confirmation…</p>
+            <div style="background:#1b4755; border-radius:40px; padding:26px;">
+                <div style="font-size:1.4rem;">Debit card *1758 <span style="color:#ffa270;">Not Received?</span></div>
+                <div class="pending-card-status">
+                    <div class="status-icon">🖨️ <span style="display:block; font-size:0.9rem;">Printing</span></div>
+                    <div class="status-icon">📦 <span style="display:block; font-size:0.9rem;">Shipped</span></div>
+                    <div class="status-icon">✅ <span style="display:block; font-size:0.9rem;">Delivered</span></div>
+                </div>
+                <div style="background:#2a4350; border-radius:50px; padding:12px; text-align:center;">⚠️ Pending Card</div>
+            </div>
+        </div>
+
+        <!-- bottom navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" id="navHome">🏠 Home</div>
+            <div class="nav-item" id="navHistory">📜 History</div>
+            <div class="nav-item" id="navBtc">₿ BTC</div>
+        </div>
+
+        <!-- contact / support footer -->
+        <div class="contact-bar">
+            <div class="contact-item" id="contactEmail">📧 reliable.delivery@usa.com</div>
+            <div class="contact-item" id="contactPhone">📞 +1(272) 280-5806</div>
+            <div class="contact-item" id="contactLocation">📍 1145 Northpoint Drive, Coppell, Texas</div>
+            <div class="about-trigger" id="aboutTrigger">ℹ️ About</div>
+        </div>
+        <div id="aboutMessage" style="background:#12313c; border-radius:20px; padding:14px; margin:10px 0; color:#aae0f0; display:none;">Green Dot was originally founded in Pasadena, California, but its main corporate office is now in Texas.</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----- DOM elements -----
+        const loginContainer = document.getElementById('login-container');
+        const dashboard = document.getElementById('dashboard');
+        const loginBtn = document.getElementById('login-btn');
+        const passwordInput = document.getElementById('login-password');
+        const loginError = document.getElementById('login-error');
+        const nameInput = document.getElementById('login-name');
+        const emailInput = document.getElementById('login-email');
+
+        const cardHolderSpan = document.getElementById('cardHolderName');
+        const cardFlipDiv = document.getElementById('cardFlip');
+        const transferBtn = document.getElementById('transferBtn');
+        const depositBtn = document.getElementById('depositBtn');
+        const actionMsg = document.getElementById('actionMessage');
+
+        // navigation
+        const navHome = document.getElementById('navHome');
+        const navHistory = document.getElementById('navHistory');
+        const navBtc = document.getElementById('navBtc');
+        const homeView = document.getElementById('home-view');
+        const historyView = document.getElementById('history-view');
+        const btcView = document.getElementById('btc-view');
+        const backFromHistory = document.getElementById('backFromHistory');
+        const backFromBtc = document.getElementById('backFromBtc');
+        const btcWalletPageBtn = document.getElementById('btcWalletPageBtn');
+
+        // contact / about
+        const contactEmail = document.getElementById('contactEmail');
+        const contactPhone = document.getElementById('contactPhone');
+        const contactLocation = document.getElementById('contactLocation');
+        const aboutTrigger = document.getElementById('aboutTrigger');
+        const aboutMsg = document.getElementById('aboutMessage');
+        const mailReceiptLink = document.getElementById('mailReceiptLink');
+        const btcMailLink = document.getElementById('btcMailLink');
+
+        // clock update
+        function updateClock() {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2,'0');
+            const mm = String(now.getMinutes()).padStart(2,'0');
+            const ss = String(now.getSeconds()).padStart(2,'0');
+            document.getElementById('liveClock').innerText = `${hh}:${mm}:${ss}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Login logic
+        loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const pwd = passwordInput.value.trim();
+            if (pwd === '1221') {
+                loginContainer.classList.add('hidden');
+                dashboard.classList.remove('hidden');
+                // set card holder name
+                const enteredName = nameInput.value.trim().toUpperCase() || 'CHARLES WATTS';
+                cardHolderSpan.innerText = enteredName;
+
+                // reset views to home
+                showHome();
+                // hide any error
+                loginError.classList.add('hidden');
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        // card flip function (global)
+        window.flipCard = function() {
+            cardFlipDiv.classList.toggle('flipped');
+        };
+
+        // show/hide messages for transfer/deposit
+        transferBtn.addEventListener('click', function() {
+            actionMsg.classList.remove('hidden');
+            actionMsg.innerText = '⚠️ You haven’t finished your order for your unlimited green dot card. Once the order is paid we will deliver your unlimited green dot card to withdraw your funds deposited.';
+        });
+        depositBtn.addEventListener('click', function() {
+            actionMsg.classList.remove('hidden');
+            actionMsg.innerText = '📦 Complete your order to deposit here.';
+        });
+
+        // navigation helpers
+        function showHome() {
+            homeView.classList.remove('hidden');
+            historyView.classList.add('hidden');
+            btcView.classList.add('hidden');
+            navHome.classList.add('active');
+            navHistory.classList.remove('active');
+            navBtc.classList.remove('active');
+        }
+        function showHistory() {
+            homeView.classList.add('hidden');
+            historyView.classList.remove('hidden');
+            btcView.classList.add('hidden');
+            navHome.classList.remove('active');
+            navHistory.classList.add('active');
+            navBtc.classList.remove('active');
+        }
+        function showBtcPage() {
+            homeView.classList.add('hidden');
+            historyView.classList.add('hidden');
+            btcView.classList.remove('hidden');
+            navHome.classList.remove('active');
+            navHistory.classList.remove('active');
+            navBtc.classList.add('active');
+        }
+
+        navHome.addEventListener('click', showHome);
+        navHistory.addEventListener('click', showHistory);
+        navBtc.addEventListener('click', showBtcPage);
+        backFromHistory.addEventListener('click', showHome);
+        backFromBtc.addEventListener('click', showHome);
+        btcWalletPageBtn.addEventListener('click', showBtcPage);
+
+        // contact clicks: email, phone, location
+        contactEmail.addEventListener('click', function() {
+            window.location.href = 'mailto:reliable.delivery@usa.com';
+        });
+        contactPhone.addEventListener('click', function() {
+            window.location.href = 'tel:+12722805806';
+        });
+        contactLocation.addEventListener('click', function() {
+            window.open('https://maps.google.com/?q=1145+Northpoint+Drive,+Coppell,+Texas+75019');
+        });
+
+        // mail receipt links (green-dot@greenmail.net)
+        function mailtoGreenDot() {
+            window.location.href = 'mailto:green-dot@greenmail.net';
+        }
+        mailReceiptLink.addEventListener('click', mailtoGreenDot);
+        if (btcMailLink) btcMailLink.addEventListener('click', mailtoGreenDot);
+
+        // about trigger
+        aboutTrigger.addEventListener('click', function() {
+            if (aboutMsg.style.display === 'none' || aboutMsg.style.display === '') {
+                aboutMsg.style.display = 'block';
+            } else {
+                aboutMsg.style.display = 'none';
+            }
+        });
+
+        // history receipt: already displayed in history-view
+
+        // also make the BTC address clickable? not needed but we can copy, but not required.
+
+        // ensure that the card shows correct name after login; also works if name changed.
+        // Also double click card hint
+
+        // initial login page password hint (just in case)
+        document.getElementById('login-password').value = ''; // empty
+
+        // make bottom nav interactive
+        // also any click on "home" from btc/history is handled
+    })();
+</script>
+<!-- ensure that double click works even if user taps on mobile, but it's fine -->
+</body>
+</html>
